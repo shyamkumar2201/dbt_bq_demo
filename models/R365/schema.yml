@@ -1,0 +1,45 @@
+version: 2
+
+sources:
+  - name: intacct_dummy
+    database: restarunt-365
+    tables:
+      - name: rdm_contract_line_items
+      - name: rdm_int_straightlined_revenue
+      - name: rdm_contracts
+      - name: rdm_int_usage_revenue
+        loaded_at_field: _partitiontime
+        freshness:
+          warn_after: { count: 12, period: hour }
+          error_after: { count: 24, period: hour }
+
+models:
+  - name: rdm_contract_line_items
+    description: One record per contract_id
+    columns:
+      - name: contract_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: contract_line_item_price
+        description: This price indicates in USD.
+
+  - name: rdm_contracts
+    description: This model provides the active and inactive customers data
+    columns:
+      - name: contract_status
+        description: This field indicates the status of a customer
+        tests:
+          - accepted_values:
+              values: ["ACTIVE", "INACTIVE"]
+
+  - name: rdm_int_straightlined_revenue
+    description: This model provides the straight lined revenue information
+    columns:
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('rdm_contract_line_items')
+              field: customer_id
