@@ -2,7 +2,12 @@ version: 2
 
 sources:
   - name: intacct_dummy
-    database: restarunt-365
+    database: |
+      {%- if  target.name == "dev" -%} restarunt-365
+      {%- elif target.name == "qa"  -%} restarunt-365
+      {%- elif target.name == "prod"  -%} restarunt-365
+      {%- else -%} restarunt-365
+      {%- endif -%}
     tables:
       - name: rdm_contract_line_items
       - name: rdm_int_straightlined_revenue
