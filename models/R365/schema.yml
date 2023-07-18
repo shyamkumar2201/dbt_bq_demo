@@ -1,22 +1,21 @@
 version: 2
 
 sources:
-  - name: intacct_dummy
+  - name: |
+      {%- if  target.name == "dev" -%} intacct_dummy
+      {%- elif target.name == "qa"  -%} intacct_dummy
+      {%- elif target.name == "prod"  -%} dbt_bq_demo_prod
+      {%- else -%} intacct_dummy
+      {%- endif -%}
     database: |
       {%- if  target.name == "dev" -%} restarunt-365
       {%- elif target.name == "qa"  -%} restarunt-365
-      {%- elif target.name == "prod"  -%} restarunt-365
+      {%- elif target.name == "prod"  -%} dbt-bq-demo-391806
       {%- else -%} restarunt-365
       {%- endif -%}
     tables:
-      - name: rdm_contract_line_items
-      - name: rdm_int_straightlined_revenue
-      - name: rdm_contracts
-      - name: rdm_int_usage_revenue
-        loaded_at_field: _partitiontime
-        freshness:
-          warn_after: { count: 12, period: hour }
-          error_after: { count: 24, period: hour }
+      - name: udm_accounts
+
 
 models:
   - name: rdm_contract_line_items
@@ -48,3 +47,8 @@ models:
           - relationships:
               to: ref('rdm_contract_line_items')
               field: customer_id
+  - name: rdm_int_usage_revenue
+    freshness:
+      warn_after: {count:12,period: hour}
+      error_after: {count:24, period: hour}
+    loaded_at_field: _partitiontime
